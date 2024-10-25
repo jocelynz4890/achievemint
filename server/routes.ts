@@ -40,10 +40,23 @@ class Routes {
     return await Authing.getUserByUsername(username);
   }
 
+  @Router.post("/collections")
+  async makeDefaultCollections(session: SessionDoc) {
+    const owner = Sessioning.getUser(session);
+    const lifestyle = await Collectioning.createCollection(owner, Category.Root, "Lifestyle");
+    const health = await Collectioning.createCollection(owner, Category.Root, "HealthAndFitness");
+    const entertainment = await Collectioning.createCollection(owner, Category.Root, "Entertainment");
+    const food = await Collectioning.createCollection(owner, Category.Root, "FoodAndCooking");
+    const fashion = await Collectioning.createCollection(owner, Category.Root, "FashionAndBeauty");
+    const education = await Collectioning.createCollection(owner, Category.Root, "EducationAndDIY");
+    return [lifestyle, health, entertainment, food, fashion, education];
+  }
+
   @Router.post("/users")
   async createUser(session: SessionDoc, username: string, password: string, role: Role) {
     console.log("Create user: session", session, "not session", username, password, role);
     Sessioning.isLoggedOut(session);
+    await this.makeDefaultCollections(session);
     return await Authing.create(username, password, role);
   }
 
@@ -62,6 +75,25 @@ class Routes {
   @Router.delete("/users")
   async deleteUser(session: SessionDoc) {
     const user = Sessioning.getUser(session);
+    // delete default collections
+    const defaults = await Authing.getDefaults(user);
+    for (const collection of defaults) {
+      await Collectioning.deleteCollection(user, (await Collectioning.getCollectionById(collection)).title);
+    }
+    // delete collections
+    await Collectioning.deleteCollections(user);
+    // delete trackers
+    await Trackering.deleteTrackers(user);
+    // remove friends
+    const friends = await Friending.getFriends(user);
+    for (const friend of friends) {
+      await Friending.removeFriend(user, friend);
+    }
+    // delete summary data
+    await Summarizing.deleteSummary(user);
+    // delete leveling data
+    await Leveling.deleteLevel(user);
+    // end session
     Sessioning.end(session);
     return await Authing.delete(user);
   }
@@ -190,18 +222,6 @@ class Routes {
     const user = Sessioning.getUser(session);
     const fromOid = (await Authing.getUserByUsername(from))._id;
     return await Friending.rejectRequest(fromOid, user);
-  }
-
-  @Router.post("/collections")
-  async makeDefaultCollections(session: SessionDoc) {
-    const owner = Sessioning.getUser(session);
-    const lifestyle = await Collectioning.createCollection(owner, Category.Root, "Lifestyle");
-    const health = await Collectioning.createCollection(owner, Category.Root, "HealthAndFitness");
-    const entertainment = await Collectioning.createCollection(owner, Category.Root, "Entertainment");
-    const food = await Collectioning.createCollection(owner, Category.Root, "FoodAndCooking");
-    const fashion = await Collectioning.createCollection(owner, Category.Root, "FashionAndBeauty");
-    const education = await Collectioning.createCollection(owner, Category.Root, "EducationAndDIY");
-    return [lifestyle, health, entertainment, food, fashion, education];
   }
 
   @Router.patch("/posts/:id/increment-rating")

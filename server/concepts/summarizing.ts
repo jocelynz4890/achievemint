@@ -56,4 +56,9 @@ export default class SummarizingConcept {
       return idx;
     }
   }
+
+  async deleteSummary(_id: ObjectId) {
+    await this.summaries.deleteOne({ _id });
+    return { msg: "User summary deleted!" };
+  }
 }

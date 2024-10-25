@@ -102,7 +102,7 @@ export default class TrackeringConcept {
       await this.trackers.partialUpdateOne({ id }, { days });
       return { msg: "Successfully unchecked progress." };
     }
-    throw new Error("Tracker could not be found!");
+    throw new NotFoundError("Tracker could not be found!");
   }
 
   async getTotalCheckedDays(owner: ObjectId, title: String) {
@@ -132,6 +132,12 @@ export default class TrackeringConcept {
       return { msg: `Tracker "${title}" deleted!` };
     }
     throw new NotFoundError("Tracker could not be found!");
+  }
+
+  async deleteTrackers(user: ObjectId) {
+    const trackers = this.trackers.readMany({ user });
+    await this.trackers.deleteMany({ owner: user });
+    return { msg: `All trackers of ${user} have been deleted.` };
   }
 
   async getSharedTrackers(user: ObjectId) {

@@ -182,6 +182,11 @@ export default class CollectioningConcept {
     throw new NotFoundError("Collection could not be found!");
   }
 
+  async deleteCollections(user: ObjectId) {
+    const trackers = this.collections.readMany({ user });
+    await this.collections.deleteMany({ owner: user });
+  }
+
   async getSharedCollections(user: ObjectId) {
     const collections = await this.collections.readMany({ shared: { $in: [user] } });
     return collections.map((collection) => collection._id);

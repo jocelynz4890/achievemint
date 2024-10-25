@@ -11,6 +11,7 @@ export interface UserDoc extends BaseDoc {
   username: string;
   password: string;
   role: Role;
+  defaults: Array<ObjectId>;
 }
 
 /**
@@ -48,6 +49,23 @@ export default class AuthenticatingConcept {
       throw new NotFoundError(`User not found!`);
     }
     return this.redactPassword(user);
+  }
+
+  async setDefaults(_id: ObjectId, defaults: Array<ObjectId>) {
+    const user = await this.users.readOne({ _id });
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+    await this.users.partialUpdateOne({ _id }, { defaults: defaults });
+    return { msg: "User defaults set successfully!" };
+  }
+
+  async getDefaults(_id: ObjectId) {
+    const user = await this.users.readOne({ _id });
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+    return user.defaults;
   }
 
   async getUserByUsername(username: string) {

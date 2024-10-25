@@ -58,4 +58,9 @@ export default class LevelingConcept {
     const total = await this.addExp(uid, exp);
     return { msg: "Exp successfully updated!", exp: total };
   }
+
+  async deleteLevel(_id: ObjectId) {
+    await this.levels.deleteOne({ _id });
+    return { msg: "User levels deleted!" };
+  }
 }
