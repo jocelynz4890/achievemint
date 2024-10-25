@@ -25,9 +25,8 @@ onBeforeMount(async () => {
   <header>
     <nav>
       <div class="title">
-        <img src="@/assets/images/logo.svg" />
-        <RouterLink :to="{ name: 'Home' }">
-          <h1>Social Media App</h1>
+        <RouterLink :to="{ name: 'Home' }" :class="{ underline: currentRouteName == 'Home' }">
+          <h1>achievemint🌱</h1>
         </RouterLink>
       </div>
       <ul>
