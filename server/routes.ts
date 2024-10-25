@@ -79,12 +79,12 @@ class Routes {
     return { msg: "Logged out!" };
   }
 
-  @Router.get("/contentcreators")
+  @Router.get("/users/contentcreators")
   async getContentCreators() {
     return await Authing.getUsersByRole(Role.ContentCreator);
   }
 
-  @Router.get("/regularusers")
+  @Router.get("/users/regularusers")
   async getRegularUsers() {
     return await Authing.getUsersByRole(Role.RegularUser);
   }
@@ -142,46 +142,50 @@ class Routes {
     return await Friending.removeFriend(user, friendOid);
   }
 
-  @Router.post("/follow")
-  async followContentCreator(user1: ObjectId, user2: ObjectId) {
+  @Router.post("/friends/follow")
+  async followContentCreator(user: string, contentCreator: string) {
+    const user1 = (await Authing.getUserByUsername(user))._id;
+    const user2 = (await Authing.getUserByUsername(contentCreator))._id;
     if ((await Authing.getUserRole(user1)) === Role.RegularUser) Friending.addFriend(user1, user2);
   }
 
-  @Router.post("/unfollow")
-  async unfollowContentCreator(user: ObjectId, friend: ObjectId) {
-    if ((await Authing.getUserRole(user)) === Role.RegularUser) {
-      await Friending.removeFriend(user, friend);
+  @Router.post("/friends/unfollow")
+  async unfollowContentCreator(user: string, friend: string) {
+    const userid = (await Authing.getUserByUsername(user))._id;
+    const friendid = (await Authing.getUserByUsername(friend))._id;
+    if ((await Authing.getUserRole(userid)) === Role.RegularUser) {
+      await Friending.removeFriend(userid, friendid);
     }
   }
 
-  @Router.get("/friend/requests")
+  @Router.get("/friends/requests")
   async getRequests(session: SessionDoc) {
     const user = Sessioning.getUser(session);
     return await Responses.friendRequests(await Friending.getRequests(user));
   }
 
-  @Router.post("/friend/requests/:to")
+  @Router.post("/friends/requests/:to")
   async sendFriendRequest(session: SessionDoc, to: string) {
     const user = Sessioning.getUser(session);
     const toOid = (await Authing.getUserByUsername(to))._id;
     return await Friending.sendRequest(user, toOid);
   }
 
-  @Router.delete("/friend/requests/:to")
+  @Router.delete("/friends/requests/:to")
   async removeFriendRequest(session: SessionDoc, to: string) {
     const user = Sessioning.getUser(session);
     const toOid = (await Authing.getUserByUsername(to))._id;
     return await Friending.removeRequest(user, toOid);
   }
 
-  @Router.put("/friend/accept/:from")
+  @Router.put("/friends/accept/:from")
   async acceptFriendRequest(session: SessionDoc, from: string) {
     const user = Sessioning.getUser(session);
     const fromOid = (await Authing.getUserByUsername(from))._id;
     return await Friending.acceptRequest(fromOid, user);
   }
 
-  @Router.put("/friend/reject/:from")
+  @Router.put("/friends/reject/:from")
   async rejectFriendRequest(session: SessionDoc, from: string) {
     const user = Sessioning.getUser(session);
     const fromOid = (await Authing.getUserByUsername(from))._id;
@@ -211,8 +215,9 @@ class Routes {
   }
 
   @Router.get("/posts/:author")
-  async getAuthorPosts(author: ObjectId) {
-    return await Posting.getByAuthor(author);
+  async getAuthorPosts(author: string) {
+    const authorid = (await Authing.getUserByUsername(author))._id;
+    return await Posting.getByAuthor(authorid);
   }
 
   @Router.patch("/posts/:category")
@@ -221,26 +226,26 @@ class Routes {
     return await Posting.getByCategory(category);
   }
 
-  @Router.get("/followers")
+  @Router.get("/friends/followers")
   async getFollowers(session: SessionDoc) {
     const user = Sessioning.getUser(session);
     return (await Friending.getFriends(user)).filter(async (friend) => (await Authing.getUserRole(friend)) === Role.RegularUser);
   }
 
-  @Router.get("/followings")
+  @Router.get("/friends/followings")
   async getFollowings(session: SessionDoc) {
     const user = Sessioning.getUser(session);
     return (await Friending.getFriends(user)).filter(async (friend) => (await Authing.getUserRole(friend)) === Role.ContentCreator);
   }
 
   @Router.post("/trackers/create")
-  async createTracker(session: SessionDoc, title: String) {
+  async createTracker(session: SessionDoc, title: string) {
     const owner = Sessioning.getUser(session);
     return await Trackering.makeTracker(owner, title);
   }
 
   @Router.post("/collections/create")
-  async createCollection(session: SessionDoc, parent: Category, title: String, deadline: String) {
+  async createCollection(session: SessionDoc, parent: Category, title: string, deadline: string) {
     const defaultCategories = ["Lifestyle", "HealthAndFitness", "Entertainment", "FoodAndCooking", "FashionAndBeauty", "EducationAndDIY"];
     // if parent is not a default Category, it gets put into the default category Lifestyle
     if (defaultCategories.filter((str) => str === parent).length <= 0) parent = Category.Lifestyle;
@@ -264,7 +269,8 @@ class Routes {
   /**
    * Given an owner and title of a tracker, returns trackers of the same title that are shared with the owner.
    */
-  async getSharedTrackers(owner: ObjectId, title: String) {
+  async getSharedTrackers(user: string, title: string) {
+    const owner = (await Authing.getUserByUsername(user))._id;
     return await Promise.all(
       (await Trackering.getSharedTrackers(owner)).filter(async (tracker) => {
         const trackerObj = await Trackering.getTrackerById(tracker);
@@ -280,7 +286,8 @@ class Routes {
   /**
    * Given an owner and title of a collection, returns collections of the same title that are shared with the owner.
    */
-  async getSharedCollections(owner: ObjectId, title: String) {
+  async getSharedCollections(user: string, title: string) {
+    const owner = (await Authing.getUserByUsername(user))._id;
     return await Promise.all(
       (await Collectioning.getSharedCollections(owner)).filter(async (collection) => {
         const collectionObj = await Collectioning.getCollectionById(collection);
@@ -293,39 +300,43 @@ class Routes {
   }
 
   @Router.post("/trackers/share")
-  async shareTracker(session: SessionDoc, to: ObjectId, title: String) {
+  async shareTracker(session: SessionDoc, to: string, title: string) {
+    const toId = (await Authing.getUserByUsername(to))._id;
     const user = Sessioning.getUser(session);
     if ((await Authing.getUserRole(user)) === Role.RegularUser) {
-      return await Trackering.shareTracker(user, title, to);
+      return await Trackering.shareTracker(user, title, toId);
     }
   }
 
   @Router.post("/collections/share")
-  async shareCollection(session: SessionDoc, to: ObjectId, title: String) {
+  async shareCollection(session: SessionDoc, to: string, title: string) {
+    const toId = (await Authing.getUserByUsername(to))._id;
     const user = Sessioning.getUser(session);
     if ((await Authing.getUserRole(user)) === Role.RegularUser) {
-      return await Collectioning.shareCollection(user, title, to);
+      return await Collectioning.shareCollection(user, title, toId);
     }
   }
 
   @Router.post("/trackers/unshare")
-  async unshareTracker(session: SessionDoc, from: ObjectId, title: String) {
+  async unshareTracker(session: SessionDoc, from: string, title: string) {
+    const fromId = (await Authing.getUserByUsername(from))._id;
     const user = Sessioning.getUser(session);
     if ((await Authing.getUserRole(user)) === Role.RegularUser) {
-      return await Trackering.unshareTracker(user, title, from);
+      return await Trackering.unshareTracker(user, title, fromId);
     }
   }
 
   @Router.post("/collections/unshare")
-  async unshareCollection(session: SessionDoc, from: ObjectId, title: String) {
+  async unshareCollection(session: SessionDoc, from: string, title: string) {
+    const fromId = (await Authing.getUserByUsername(from))._id;
     const user = Sessioning.getUser(session);
     if ((await Authing.getUserRole(user)) === Role.RegularUser) {
-      return await Collectioning.unshareCollection(user, title, from);
+      return await Collectioning.unshareCollection(user, title, fromId);
     }
   }
 
   @Router.delete("/trackers")
-  async deleteTracker(session: SessionDoc, title: String) {
+  async deleteTracker(session: SessionDoc, title: string) {
     const user = Sessioning.getUser(session);
     if ((await Authing.getUserRole(user)) === Role.RegularUser) {
       return await Trackering.deleteTracker(user, title);
@@ -333,7 +344,7 @@ class Routes {
   }
 
   @Router.delete("/collections")
-  async deleteCollection(session: SessionDoc, title: String) {
+  async deleteCollection(session: SessionDoc, title: string) {
     const user = Sessioning.getUser(session);
     if ((await Authing.getUserRole(user)) === Role.RegularUser) {
       return await Collectioning.deleteCollection(user, title);
@@ -342,7 +353,7 @@ class Routes {
 
   @Router.patch("/trackers/:title/check")
   @Router.validate(z.object({ title: z.string(), day: z.number().min(0).max(364) }))
-  async checkTracker(session: SessionDoc, title: String, day: number) {
+  async checkTracker(session: SessionDoc, title: string, day: number) {
     const user = Sessioning.getUser(session);
     if ((await Authing.getUserRole(user)) === Role.RegularUser) {
       await Trackering.checkDay(user, title, day);
@@ -353,7 +364,7 @@ class Routes {
 
   @Router.patch("/trackers/:title/uncheck")
   @Router.validate(z.object({ title: z.string(), day: z.number().min(0).max(364) }))
-  async uncheckTracker(session: SessionDoc, title: String, day: number) {
+  async uncheckTracker(session: SessionDoc, title: string, day: number) {
     const user = Sessioning.getUser(session);
     if ((await Authing.getUserRole(user)) === Role.RegularUser) {
       await Trackering.uncheckDay(user, title, day);
@@ -362,13 +373,18 @@ class Routes {
     }
   }
 
+  /**
+   *
+   * @param id id of a default category
+   * @returns
+   */
   @Router.get("/collections/:id")
   async getPostsInCollection(id: ObjectId) {
     return await Collectioning.getContent(id);
   }
 
   @Router.patch("/collections/add")
-  async addToCollection(session: SessionDoc, collectionTitle: String, post: ObjectId) {
+  async addToCollection(session: SessionDoc, collectionTitle: string, post: ObjectId) {
     const user = Sessioning.getUser(session);
     if ((await Authing.getUserRole(user)) === Role.RegularUser) {
       await Collectioning.addToCollection(user, collectionTitle, post);
@@ -389,7 +405,7 @@ class Routes {
   }
 
   @Router.patch("/collections/remove")
-  async removeFromCollection(session: SessionDoc, collectionTitle: String, post: ObjectId) {
+  async removeFromCollection(session: SessionDoc, collectionTitle: string, post: ObjectId) {
     const user = Sessioning.getUser(session);
     if ((await Authing.getUserRole(user)) === Role.RegularUser) {
       await Collectioning.removeFromCollection(user, collectionTitle, post);
@@ -410,14 +426,14 @@ class Routes {
   }
 
   @Router.patch("/collections")
-  async updateCollectionDeadline(session: SessionDoc, collectionTitle: String, deadline: String) {
+  async updateCollectionDeadline(session: SessionDoc, collectionTitle: string, deadline: string) {
     const user = Sessioning.getUser(session);
     if ((await Authing.getUserRole(user)) === Role.RegularUser) {
       return await Collectioning.updateCollectionDeadline(user, collectionTitle, deadline);
     }
   }
 
-  @Router.post("/exp")
+  @Router.post("/level/exp")
   /**
    * @param user
    * @returns the total number of checked days across all of the user's trackers
@@ -435,16 +451,18 @@ class Routes {
   }
 
   @Router.get("/level")
-  async getLevel(user: ObjectId) {
-    return await Leveling.getLvl(user);
+  async getLevel(user: string) {
+    const userId = (await Authing.getUserByUsername(user))._id;
+    return await Leveling.getLvl(userId);
   }
 
-  @Router.get("/exp")
-  async getExp(user: ObjectId) {
-    return await Leveling.getExp(user);
+  @Router.get("/level/exp")
+  async getExp(user: string) {
+    const userId = (await Authing.getUserByUsername(user))._id;
+    return await Leveling.getExp(userId);
   }
 
-  @Router.post("/explore")
+  @Router.post("/summary/explore")
   /**
    * Given a user, recommends a category of content for the user by returning a category in which the user has
    * the least amount of saved posts.
@@ -459,9 +477,10 @@ class Routes {
   }
 
   @Router.get("/summary")
-  async getSummary(user: ObjectId) {
-    if ((await Authing.getUserRole(user)) === Role.RegularUser) {
-      return await Summarizing.getSummary(user);
+  async getSummary(user: string) {
+    const userId = (await Authing.getUserByUsername(user))._id;
+    if ((await Authing.getUserRole(userId)) === Role.RegularUser) {
+      return await Summarizing.getSummary(userId);
     }
   }
 }
