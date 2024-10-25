@@ -146,11 +146,11 @@ class Routes {
   }
 
   @Router.patch("/posts/:id")
-  async updatePost(session: SessionDoc, id: string, content?: string, options?: PostOptions) {
+  async updatePost(session: SessionDoc, id: string, content?: string, category?: Category, options?: PostOptions) {
     const user = Sessioning.getUser(session);
     const oid = new ObjectId(id);
     await Posting.assertAuthorIsUser(oid, user);
-    return await Posting.update(oid, content, options);
+    return await Posting.update(oid, content, category, options);
   }
 
   @Router.delete("/posts/:id")

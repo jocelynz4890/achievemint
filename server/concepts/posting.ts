@@ -69,10 +69,10 @@ export default class PostingConcept {
     return await this.posts.readMany({ category });
   }
 
-  async update(_id: ObjectId, content?: string, options?: PostOptions) {
+  async update(_id: ObjectId, content?: string, category?: Category, options?: PostOptions) {
     // Note that if content or options is undefined, those fields will *not* be updated
     // since undefined values for partialUpdateOne are ignored.
-    await this.posts.partialUpdateOne({ _id }, { content, options });
+    await this.posts.partialUpdateOne({ _id }, { content, category, options });
     return { msg: "Post successfully updated!" };
   }
 
