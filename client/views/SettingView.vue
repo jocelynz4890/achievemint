@@ -21,7 +21,9 @@ async function delete_() {
 
 <template>
   <main class="column">
-    <h1>{{ currentUsername }}'s Settings'</h1>
+    <h1>{{ currentUsername }}'s profile</h1>
+    <LevelDisplay />
+    <h1>{{ currentUsername }}'s settings</h1>
     <button class="pure-button pure-button-primary" @click="logout">Logout</button>
     <button class="button-error pure-button" @click="delete_">Delete User</button>
     <UpdateUserForm />

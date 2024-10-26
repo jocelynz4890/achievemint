@@ -19,7 +19,7 @@ async function getLevel() {
 
 async function getExp() {
   try {
-    const response = await fetch("/exp");
+    const response = await fetch("/level/exp");
     if (response.ok) {
       currentExp.value = await response.json();
     } else {
@@ -31,7 +31,7 @@ async function getExp() {
 }
 
 const expPercentage = computed(() => {
-  return ((currentExp.value / 30) * 100).toFixed(2);
+  return ((currentExp.value / 30) * 100).trunc();
 });
 
 onMounted(async () => {
@@ -42,7 +42,7 @@ onMounted(async () => {
 
 <template>
   <div class="user-level-display">
-    <h3>User Level: {{ level }}</h3>
+    <h3>Level: {{ level }}</h3>
     <div class="exp-bar">
       <div class="exp-progress" :style="{ width: expPercentage + '%' }"></div>
     </div>
