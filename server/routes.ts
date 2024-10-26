@@ -16,6 +16,16 @@ const RoleSchema = z.enum([Role.RegularUser, Role.ContentCreator]);
 const PostOptionsSchema = z.object({
   backgroundColor: z.string().optional(),
 });
+async function makeDefaultCollections(session: SessionDoc) {
+  const owner = Sessioning.getUser(session);
+  const lifestyle = await Collectioning.createCollection(owner, Category.Root, "Lifestyle");
+  const health = await Collectioning.createCollection(owner, Category.Root, "HealthAndFitness");
+  const entertainment = await Collectioning.createCollection(owner, Category.Root, "Entertainment");
+  const food = await Collectioning.createCollection(owner, Category.Root, "FoodAndCooking");
+  const fashion = await Collectioning.createCollection(owner, Category.Root, "FashionAndBeauty");
+  const education = await Collectioning.createCollection(owner, Category.Root, "EducationAndDIY");
+  return [lifestyle, health, entertainment, food, fashion, education];
+}
 
 /**
  * Web server routes for the app. Implements synchronizations between concepts.
@@ -40,23 +50,9 @@ class Routes {
     return await Authing.getUserByUsername(username);
   }
 
-  @Router.post("/collections")
-  async makeDefaultCollections(session: SessionDoc) {
-    const owner = Sessioning.getUser(session);
-    const lifestyle = await Collectioning.createCollection(owner, Category.Root, "Lifestyle");
-    const health = await Collectioning.createCollection(owner, Category.Root, "HealthAndFitness");
-    const entertainment = await Collectioning.createCollection(owner, Category.Root, "Entertainment");
-    const food = await Collectioning.createCollection(owner, Category.Root, "FoodAndCooking");
-    const fashion = await Collectioning.createCollection(owner, Category.Root, "FashionAndBeauty");
-    const education = await Collectioning.createCollection(owner, Category.Root, "EducationAndDIY");
-    return [lifestyle, health, entertainment, food, fashion, education];
-  }
-
   @Router.post("/users")
   async createUser(session: SessionDoc, username: string, password: string, role: Role) {
-    console.log("Create user: session", session, "not session", username, password, role);
     Sessioning.isLoggedOut(session);
-    await this.makeDefaultCollections(session);
     return await Authing.create(username, password, role);
   }
 
@@ -102,6 +98,9 @@ class Routes {
   async logIn(session: SessionDoc, username: string, password: string) {
     const u = await Authing.authenticate(username, password);
     Sessioning.start(session, u._id);
+    if (await Authing.isDefaultsEmpty(u._id)) {
+      await makeDefaultCollections(session);
+    }
     return { msg: "Logged in!" };
   }
 

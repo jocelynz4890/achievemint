@@ -15,8 +15,10 @@ const { toast } = storeToRefs(useToastStore());
 onBeforeMount(async () => {
   try {
     await userStore.updateSession();
+    console.log(isLoggedIn.value);
   } catch {
     // User is not logged in
+    console.log("user is not logged in");
   }
 });
 </script>

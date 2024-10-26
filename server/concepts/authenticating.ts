@@ -30,10 +30,18 @@ export default class AuthenticatingConcept {
     void this.users.collection.createIndex({ username: 1 });
   }
 
+  async isDefaultsEmpty(_id: ObjectId) {
+    const user = await this.users.readOne({ _id });
+    if (user === null) {
+      throw new NotFoundError(`User not found!`);
+    }
+    return user.defaults.length == 0;
+  }
+
   async create(username: string, password: string, role: Role) {
     await this.assertGoodCredentials(username, password);
     if (role !== Role.ContentCreator && role !== Role.RegularUser) return { msg: "Role must be ContentCreator or RegularUser!" };
-    const _id = await this.users.createOne({ username, password, role });
+    const _id = await this.users.createOne({ username: username, password: password, role: role });
     return { msg: "User created successfully!", user: await this.users.readOne({ _id }) };
   }
 
