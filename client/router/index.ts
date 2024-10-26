@@ -23,24 +23,48 @@ const router = createRouter({
       name: "Settings",
       component: SettingView,
       meta: { requiresAuth: true },
+      beforeEnter: (to, from) => {
+        const { isLoggedIn } = storeToRefs(useUserStore());
+        if (isLoggedIn.value) {
+          return { name: "Settings" };
+        }
+      },
     },
     {
       path: "/collections",
       name: "Collections",
       component: CollectionView,
       meta: { requiresAuth: true },
+      beforeEnter: (to, from) => {
+        const { isLoggedIn } = storeToRefs(useUserStore());
+        if (isLoggedIn.value) {
+          return { name: "Collections" };
+        }
+      },
     },
     {
       path: "/trackers",
       name: "Trackers",
       component: TrackerView,
       meta: { requiresAuth: true },
+      beforeEnter: (to, from) => {
+        const { isLoggedIn } = storeToRefs(useUserStore());
+        if (isLoggedIn.value) {
+          return { name: "Trackers" };
+        }
+      },
     },
     {
       path: "/friends",
       name: "Friends",
       component: FriendView,
       meta: { requiresAuth: true },
+      beforeEnter: (to, from) => {
+        const { isLoggedIn } = storeToRefs(useUserStore());
+        if (isLoggedIn.value) {
+          return { name: "Friends" };
+        }
+      },
     },
     {
       path: "/login",
