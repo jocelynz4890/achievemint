@@ -1,37 +1,30 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { fetchy } from "@/utils/fetchy";
+import { computed, onMounted, ref } from "vue";
 
+const props = defineProps(["user"]);
 const level = ref(0);
 const currentExp = ref(0);
 
 async function getLevel() {
+  let query = props.user;
   try {
-    const response = await fetch("/level");
-    if (response.ok) {
-      level.value = await response.json();
-    } else {
-      console.error("Failed to fetch user level");
-    }
-  } catch (error) {
-    console.error("Error fetching user level:", error);
+    level.value = await fetchy("/api/level", "GET", { body: query });
+  } catch (_) {
+    return;
   }
 }
 
 async function getExp() {
+  let query = props.user;
   try {
-    const response = await fetch("/level/exp");
-    if (response.ok) {
-      currentExp.value = await response.json();
-    } else {
-      console.error("Failed to fetch user experience");
-    }
-  } catch (error) {
-    console.error("Error fetching user experience:", error);
+    currentExp.value = await fetchy("/api/level/exp", "GET", { body: query });
+  } catch (_) {
   }
 }
 
 const expPercentage = computed(() => {
-  return ((currentExp.value / 30) * 100).trunc();
+  return ((currentExp.value / 30) * 100).toFixed(2);
 });
 
 onMounted(async () => {

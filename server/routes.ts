@@ -24,6 +24,7 @@ async function makeDefaultCollections(session: SessionDoc) {
   const food = await Collectioning.createCollection(owner, Category.Root, "FoodAndCooking");
   const fashion = await Collectioning.createCollection(owner, Category.Root, "FashionAndBeauty");
   const education = await Collectioning.createCollection(owner, Category.Root, "EducationAndDIY");
+  console.log("made new user's default collections");
   return [lifestyle, health, entertainment, food, fashion, education];
 }
 
@@ -452,33 +453,18 @@ class Routes {
     }
   }
 
-  @Router.post("/level/exp")
-  /**
-   * @param user
-   * @returns the total number of checked days across all of the user's trackers
-   */
-  async calculateExp(session: SessionDoc) {
-    const user = Sessioning.getUser(session);
-    const source = new Array<number>();
-    const trackers = await Trackering.getTrackers(user);
-    if (trackers) {
-      for (let tracker of trackers) {
-        source.push(await Trackering.getTotalCheckedDays(user, tracker.title));
-        return await Leveling.calculateUserTotalExp(user, source);
-      }
-    }
-  }
-
-  @Router.get("/level")
+  @Router.get("/level/:user")
   async getLevel(user: string) {
     const userId = (await Authing.getUserByUsername(user))._id;
-    return await Leveling.getLvl(userId);
+    if (!userId) return await Leveling.getLvl(userId);
+    else return { msg: user + "not found!" };
   }
 
-  @Router.get("/level/exp")
+  @Router.get("/level/exp/:user")
   async getExp(user: string) {
     const userId = (await Authing.getUserByUsername(user))._id;
-    return await Leveling.getExp(userId);
+    if (!userId) return await Leveling.getExp(userId);
+    else return { msg: user + "not found!" };
   }
 
   @Router.post("/summary/explore")

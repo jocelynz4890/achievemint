@@ -15,7 +15,7 @@ const { toast } = storeToRefs(useToastStore());
 onBeforeMount(async () => {
   try {
     await userStore.updateSession();
-    console.log(isLoggedIn.value);
+    console.log("user is logged in: " + isLoggedIn.value);
   } catch {
     // User is not logged in
     console.log("user is not logged in");
@@ -47,7 +47,9 @@ onBeforeMount(async () => {
         <li v-else>
           <RouterLink :to="{ name: 'Login' }" :class="{ underline: currentRouteName == 'Login' }"> Login </RouterLink>
         </li>
-        <RouterLink :to="{ name: 'Home' }" :class="{ underline: currentRouteName == 'Home' }">Home</RouterLink>
+        <li v-if="isLoggedIn">
+            <RouterLink :to="{ name: 'Home' }" :class="{ underline: currentRouteName == 'Home' }">Home</RouterLink>
+        </li>
       </ul>
     </nav>
     <article v-if="toast !== null" class="toast" :class="toast.style">
