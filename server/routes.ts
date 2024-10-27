@@ -177,21 +177,27 @@ class Routes {
   @Router.get("/friends")
   async getFriends(session: SessionDoc) {
     const user = Sessioning.getUser(session);
-    return await Authing.idsToUsernames(await Friending.getFriends(user));
+    const friends = await Authing.idsToUsernames(await Friending.getFriends(user));
+    return { friends, msg: "Successfully retrieved friends list." };
   }
 
   @Router.delete("/friends/:friend")
   async removeFriend(session: SessionDoc, friend: string) {
     const user = Sessioning.getUser(session);
     const friendOid = (await Authing.getUserByUsername(friend))._id;
-    return await Friending.removeFriend(user, friendOid);
+    await Friending.removeFriend(user, friendOid);
+    return { msg: `Successfully removed ${friend} from your friends.` };
   }
 
   @Router.post("/friends/follow")
   async followContentCreator(user: string, contentCreator: string) {
     const user1 = (await Authing.getUserByUsername(user))._id;
     const user2 = (await Authing.getUserByUsername(contentCreator))._id;
-    if ((await Authing.getUserRole(user1)) === Role.RegularUser) Friending.addFriend(user1, user2);
+    if ((await Authing.getUserRole(user1)) === Role.RegularUser) {
+      await Friending.addFriend(user1, user2);
+      return { msg: `Successfully followed ${contentCreator}.` };
+    }
+    return { msg: "You must be a regular user to follow other users." };
   }
 
   @Router.post("/friends/unfollow")
@@ -200,41 +206,48 @@ class Routes {
     const friendid = (await Authing.getUserByUsername(friend))._id;
     if ((await Authing.getUserRole(userid)) === Role.RegularUser) {
       await Friending.removeFriend(userid, friendid);
+      return { msg: `Successfully unfollowed ${friend}.` };
     }
+    return { msg: "You must be a regular user to follow other users." };
   }
 
   @Router.get("/friends/requests")
   async getRequests(session: SessionDoc) {
     const user = Sessioning.getUser(session);
-    return await Responses.friendRequests(await Friending.getRequests(user));
+    const requests = await Responses.friendRequests(await Friending.getRequests(user));
+    return { requests, msg: "Successfully retrieved friend requests." };
   }
 
   @Router.post("/friends/requests/:to")
   async sendFriendRequest(session: SessionDoc, to: string) {
     const user = Sessioning.getUser(session);
     const toOid = (await Authing.getUserByUsername(to))._id;
-    return await Friending.sendRequest(user, toOid);
+    await Friending.sendRequest(user, toOid);
+    return { msg: `Friend request sent to ${to}.` };
   }
 
   @Router.delete("/friends/requests/:to")
   async removeFriendRequest(session: SessionDoc, to: string) {
     const user = Sessioning.getUser(session);
     const toOid = (await Authing.getUserByUsername(to))._id;
-    return await Friending.removeRequest(user, toOid);
+    await Friending.removeRequest(user, toOid);
+    return { msg: `Friend request to ${to} has been removed.` };
   }
 
   @Router.put("/friends/accept/:from")
   async acceptFriendRequest(session: SessionDoc, from: string) {
     const user = Sessioning.getUser(session);
     const fromOid = (await Authing.getUserByUsername(from))._id;
-    return await Friending.acceptRequest(fromOid, user);
+    await Friending.acceptRequest(fromOid, user);
+    return { msg: `Successfully accepted friend request from ${from}.` };
   }
 
   @Router.put("/friends/reject/:from")
   async rejectFriendRequest(session: SessionDoc, from: string) {
     const user = Sessioning.getUser(session);
     const fromOid = (await Authing.getUserByUsername(from))._id;
-    return await Friending.rejectRequest(fromOid, user);
+    await Friending.rejectRequest(fromOid, user);
+    return { msg: `Successfully rejected friend request from ${from}.` };
   }
 
   @Router.patch("/posts/:id/increment-rating")
