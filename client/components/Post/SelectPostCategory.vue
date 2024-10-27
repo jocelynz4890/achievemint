@@ -13,21 +13,24 @@ const OptionTypes = {
 
 const props = defineProps(["defaultCategory", "editingPost"]);
 
-const options = props.editingPost ? [
-    [OptionTypes.Lifestyle, "Lifestyle"],
-    [OptionTypes.HealthAndFitness, "Health and Fitness"],
-    [OptionTypes.Entertainment, "Entertainment"],
-    [OptionTypes.FoodAndCooking, "Food and Cooking"],
-    [OptionTypes.FashionAndBeauty, "Fashion and Beauty"],
-    [OptionTypes.EducationAndDIY, "Education and DIY"],
-] : [[OptionTypes.All, "All"], 
-    [OptionTypes.Lifestyle, "Lifestyle"],
-    [OptionTypes.HealthAndFitness, "Health and Fitness"],
-    [OptionTypes.Entertainment, "Entertainment"],
-    [OptionTypes.FoodAndCooking, "Food and Cooking"],
-    [OptionTypes.FashionAndBeauty, "Fashion and Beauty"],
-    [OptionTypes.EducationAndDIY, "Education and DIY"],
-];
+const options = props.editingPost
+  ? [
+      [OptionTypes.Lifestyle, "🏠 Lifestyle 🏖️"],
+      [OptionTypes.HealthAndFitness, "🫀 Health and Fitness 👟"],
+      [OptionTypes.Entertainment, "📺 Entertainment 🎉"],
+      [OptionTypes.FoodAndCooking, "🍔 Food and Cooking 🍳"],
+      [OptionTypes.FashionAndBeauty, "👗 Fashion and Beauty 💄"],
+      [OptionTypes.EducationAndDIY, "🎓 Education and DIY 📕"],
+    ]
+  : [
+      [OptionTypes.All, "All"],
+      [OptionTypes.Lifestyle, "🏠 Lifestyle 🏖️"],
+      [OptionTypes.HealthAndFitness, "🫀 Health and Fitness 👟"],
+      [OptionTypes.Entertainment, "📺 Entertainment 🎉"],
+      [OptionTypes.FoodAndCooking, "🍔 Food and Cooking 🍳"],
+      [OptionTypes.FashionAndBeauty, "👗 Fashion and Beauty 💄"],
+      [OptionTypes.EducationAndDIY, "🎓 Education and DIY 📕"],
+    ];
 
 const selectedValue = ref(props.defaultCategory);
 const emit = defineEmits(["update:selectedValue"]);

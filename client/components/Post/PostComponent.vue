@@ -2,7 +2,7 @@
 import { useUserStore } from "@/stores/user";
 import { formatDate } from "@/utils/formatDate";
 import { storeToRefs } from "pinia";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { fetchy } from "../../utils/fetchy";
 
 const props = defineProps(["post"]);
@@ -25,14 +25,70 @@ const deletePost = async () => {
   }
   emit("refreshPosts");
 };
+
+const upvotes = ref(props.post.quality_rating); 
+// watch(
+//   () => props.post.quality_rating,
+//   (newRating: number) => {
+//     upvotes.value = newRating;
+//   }
+// );
+
+const savePost = async () => {
+  upvotes.value += 1;
+  try {
+    await fetchy(`/api/posts/${props.post._id}/increment-rating`, "PATCH");
+    // emit("refreshPosts");
+  } catch(_) {
+    return;
+  }
+};
+
+const unsavePost = async () => {
+  upvotes.value -= 1;
+  try {
+    await fetchy(`/api/posts/${props.post._id}/decrement-rating`, "PATCH");
+    // emit("refreshPosts");
+  } catch(_) {
+    return;
+  }
+};
+
+const OptionTypes = {
+    All: "All",
+    Lifestyle: "Lifestyle",
+    HealthAndFitness: "HealthAndFitness",
+    Entertainment: "Entertainment",
+    FoodAndCooking: "FoodandCooking",
+    FashionAndBeauty: "FashionandBeauty",
+    EducationAndDIY: "EducationandDIY",
+};
+
+const options = [
+      [OptionTypes.All, "All"],
+      [OptionTypes.Lifestyle, "🏠 Lifestyle 🏖️"],
+      [OptionTypes.HealthAndFitness, "🫀 Health and Fitness 👟"],
+      [OptionTypes.Entertainment, "📺 Entertainment 🎉"],
+      [OptionTypes.FoodAndCooking, "🍔 Food and Cooking 🍳"],
+      [OptionTypes.FashionAndBeauty, "👗 Fashion and Beauty 💄"],
+      [OptionTypes.EducationAndDIY, "🎓 Education and DIY 📕"],
+    ];
+
+const categoryWithEmoji = computed(() => {
+  const option = options.find(([type]) => type === category.value);
+  return option ? option[1] : category.value; // fallback if no match is found
+});
+
 </script>
 
 <template>
   <span>
     <p class="author">{{ props.post.author }}</p>
-    <p>Category: {{ category }}</p>
+    <p>Category: {{ categoryWithEmoji }}</p>
   </span>
   <p>{{ props.post.content }}</p>
+  <h5>👍 This post has been saved a total of {{ upvotes }} times!</h5>
+  <button @click="savePost">❤️ {{ upvotes>0 ? upvotes : "Click to save to collection" }}</button>
   <div class="base">
     <menu v-if="props.post.author == currentUsername">
       <li><button class="btn-small pure-button" @click="emit('editPost', props.post._id)">Edit</button></li>
