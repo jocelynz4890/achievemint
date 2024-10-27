@@ -184,7 +184,7 @@ class Routes {
   @Router.get("/friends/followers")
   async getFollowers(session: SessionDoc) {
     const user = Sessioning.getUser(session);
-    return await Authing.idsToUsernames(await Promise.all((await Friending.getFriends(user)).filter(async (friend) => (await Authing.getUserRole(friend)) === Role.RegularUser)));
+    return await Authing.idsToUsernames(await Promise.all((await Friending.getFriends(user)).filter(async (friend) => (await Authing.getUserRole(friend)) !== Role.ContentCreator)));
   }
 
   @Router.get("/friends/followings")

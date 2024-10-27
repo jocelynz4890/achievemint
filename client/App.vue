@@ -17,7 +17,7 @@ onBeforeMount(async () => {
   try {
     await userStore.updateSession();
     await userStore.updateRole();
-    isRegularUser = role.value==="RegularUser"
+    isRegularUser = role.value==="RegularUser" && isLoggedIn.value;
     console.log("user is logged in: " + isLoggedIn.value);
     
   } catch {
@@ -42,7 +42,7 @@ onBeforeMount(async () => {
         <li v-if="isLoggedIn">
           <RouterLink :to="{ name: 'Trackers' }" :class="{ underline: currentRouteName == 'Trackers' }"> Trackers </RouterLink>
         </li>
-        <li v-if="isLoggedIn && isRegularUser">
+        <li v-if="isRegularUser">
           <RouterLink :to="{ name: 'Friends' }" :class="{ underline: currentRouteName == 'Friends' }"> Friends </RouterLink>
         </li>
         <li v-if="isLoggedIn">
