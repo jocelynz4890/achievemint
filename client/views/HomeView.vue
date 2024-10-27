@@ -15,6 +15,7 @@ const empty = "";
 function updateCategory(newCategory: string) {
   defaultCategory.value = newCategory;
 }
+
 </script>
 
 <template>

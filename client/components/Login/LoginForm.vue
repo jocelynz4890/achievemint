@@ -8,9 +8,14 @@ const password = ref("");
 const { loginUser, updateSession } = useUserStore();
 
 async function login() {
-  await loginUser(username.value, password.value);
-  void updateSession();
-  void router.push({ name: "Home" });
+  try {
+    await loginUser(username.value, password.value);
+    await updateSession();
+    await router.push({ name: "Home" });
+    console.log("rerouted");
+  } catch (error) {
+    console.error("Login or redirection failed:", error);
+  }
 }
 </script>
 

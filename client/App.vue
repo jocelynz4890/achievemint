@@ -8,14 +8,18 @@ import { RouterLink, RouterView, useRoute } from "vue-router";
 const currentRoute = useRoute();
 const currentRouteName = computed(() => currentRoute.name);
 const userStore = useUserStore();
-const { isLoggedIn } = storeToRefs(userStore);
+const { isLoggedIn, role } = storeToRefs(userStore);
 const { toast } = storeToRefs(useToastStore());
+let isRegularUser: boolean;
 
 // Make sure to update the session before mounting the app in case the user is already logged in
 onBeforeMount(async () => {
   try {
     await userStore.updateSession();
+    await userStore.updateRole();
+    isRegularUser = role.value==="RegularUser"
     console.log("user is logged in: " + isLoggedIn.value);
+    
   } catch {
     // User is not logged in
     console.log("user is not logged in");
@@ -38,7 +42,7 @@ onBeforeMount(async () => {
         <li v-if="isLoggedIn">
           <RouterLink :to="{ name: 'Trackers' }" :class="{ underline: currentRouteName == 'Trackers' }"> Trackers </RouterLink>
         </li>
-        <li v-if="isLoggedIn">
+        <li v-if="isLoggedIn && isRegularUser">
           <RouterLink :to="{ name: 'Friends' }" :class="{ underline: currentRouteName == 'Friends' }"> Friends </RouterLink>
         </li>
         <li v-if="isLoggedIn">

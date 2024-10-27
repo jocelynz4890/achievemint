@@ -181,6 +181,18 @@ class Routes {
     return { friends, msg: "Successfully retrieved friends list." };
   }
 
+  @Router.get("/friends/followers")
+  async getFollowers(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    return await Authing.idsToUsernames(await Promise.all((await Friending.getFriends(user)).filter(async (friend) => (await Authing.getUserRole(friend)) === Role.RegularUser)));
+  }
+
+  @Router.get("/friends/followings")
+  async getFollowings(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    return await Authing.idsToUsernames(await Promise.all((await Friending.getFriends(user)).filter(async (friend) => (await Authing.getUserRole(friend)) === Role.ContentCreator)));
+  }
+
   @Router.delete("/friends/:friend")
   async removeFriend(session: SessionDoc, friend: string) {
     const user = Sessioning.getUser(session);
@@ -270,18 +282,6 @@ class Routes {
   @Router.validate(z.object({ category: CategorySchema }))
   async getPostsInCategory(category: Category) {
     return await Posting.getByCategory(category);
-  }
-
-  @Router.get("/friends/followers")
-  async getFollowers(session: SessionDoc) {
-    const user = Sessioning.getUser(session);
-    return (await Friending.getFriends(user)).filter(async (friend) => (await Authing.getUserRole(friend)) === Role.RegularUser);
-  }
-
-  @Router.get("/friends/followings")
-  async getFollowings(session: SessionDoc) {
-    const user = Sessioning.getUser(session);
-    return (await Friending.getFriends(user)).filter(async (friend) => (await Authing.getUserRole(friend)) === Role.ContentCreator);
   }
 
   @Router.post("/trackers/create")
