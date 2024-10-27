@@ -13,14 +13,13 @@ const onProfilePage = false;
 
 <template>
   <main>
-    <h1>Explore posts by content creators</h1>
-    <SelectPostCategory :default-category="defaultCategory" :editing-post="editingPost"/>
+    <h1 v-if="isLoggedIn">Explore posts by content creators</h1>
+    <SelectPostCategory v-if="isLoggedIn" :default-category="defaultCategory" :editing-post="editingPost"/>
     <section>
       <h5 v-if="isLoggedIn">Logged in as {{ currentUsername }}!</h5>
       <h1 v-else>Please login!</h1>
     </section>
-    
-    <PostListComponent :is-on-profile-page="onProfilePage"/>
+    <PostListComponent v-if="isLoggedIn" :is-on-profile-page="onProfilePage"/>
   </main>
 </template>
 

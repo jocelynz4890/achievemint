@@ -143,9 +143,9 @@ class Routes {
   @Router.post("/posts")
   async createPost(session: SessionDoc, content: string, category: Category, options?: PostOptions) {
     console.log("Session:", session, content, category, options);
-    // If category is not one of the specified categories, the post gets automatically assigned to the lifestyle category.
+    // If category is not one of the specified categories, the post gets automatically assigned to the root category.
     const defaultCategories = ["Lifestyle", "HealthAndFitness", "Entertainment", "FoodAndCooking", "FashionAndBeauty", "EducationAndDIY"];
-    if (defaultCategories.filter((str) => str === category).length <= 0) category = Category.Lifestyle;
+    // if (defaultCategories.filter((str) => str === category).length <= 0) category = Category.Root;
     const user = Sessioning.getUser(session);
     const created = await Posting.create(user, content, category, options);
     return { msg: created.msg, post: await Responses.post(created.post) };
