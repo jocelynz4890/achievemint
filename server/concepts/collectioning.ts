@@ -44,7 +44,7 @@ export default class CollectioningConcept {
     if (collection) {
       return collection.contents;
     }
-    throw new NotFoundError("Collection could not be found!");
+    throw new NotFoundError("Collection could not be found when getting content!");
   }
 
   async getCollectionById(_id: ObjectId) {
@@ -52,15 +52,15 @@ export default class CollectioningConcept {
     if (collection) {
       return collection;
     }
-    throw new NotFoundError("Collection could not be found!");
+    throw new NotFoundError("Collection could not be found when getting by id!");
   }
 
   async getCollectionByTitle(owner: ObjectId, title: String) {
-    const collection = await this.collections.readOne({ owner, title });
+    const collection = await this.collections.readOne({ owner: owner, title: title });
     if (collection) {
       return collection;
     }
-    throw new NotFoundError("Collection could not be found!");
+    throw new NotFoundError("Collection could not be found when getting by title!");
   }
 
   async getCollectionLength(owner: ObjectId, title: String) {
@@ -68,7 +68,7 @@ export default class CollectioningConcept {
     if (collection) {
       return collection.contents.length;
     }
-    throw new NotFoundError("Collection could not be found!");
+    throw new NotFoundError("Collection could not be found when getting length!");
   }
 
   async createCollection(owner: ObjectId, parent: Category, title: String, deadline: String = "") {
@@ -97,7 +97,7 @@ export default class CollectioningConcept {
       await this.collections.partialUpdateOne({ id }, { contents });
       return { msg: "Successfully added to collection!" };
     }
-    throw new NotFoundError("Collection could not be found!");
+    throw new NotFoundError("Collection could not be found when adding to collection!");
   }
 
   async removeFromCollection(owner: ObjectId, title: String, content: ObjectId) {
@@ -114,7 +114,7 @@ export default class CollectioningConcept {
       await this.collections.partialUpdateOne({ id }, { contents });
       return { msg: "Successfully removed from collection." };
     }
-    throw new NotFoundError("Collection could not be found!");
+    throw new NotFoundError("Collection could not be found when removing from collection!");
   }
 
   async getCollectionDeadline(owner: ObjectId, title: String) {
@@ -166,7 +166,7 @@ export default class CollectioningConcept {
   async getCollectionNumContent(id: ObjectId) {
     const collection = await this.collections.readOne({ id });
     if (collection) return collection.contents.length;
-    throw new NotFoundError("Collection could not be found!");
+    throw new NotFoundError("Collection could not be found when getting number of content in collection!");
   }
 
   async deleteCollection(owner: ObjectId, title: String) {
@@ -179,7 +179,7 @@ export default class CollectioningConcept {
       await this.collections.deleteOne({ id });
       return { msg: `Collection "${title}" deleted!` };
     }
-    throw new NotFoundError("Collection could not be found!");
+    throw new NotFoundError("Collection could not be found when deleting collection!");
   }
 
   async deleteCollections(user: ObjectId) {

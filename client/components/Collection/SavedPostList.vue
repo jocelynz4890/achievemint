@@ -22,7 +22,8 @@ watch(() => props.defaultCategory, (newCategory) => {
 });
 
 async function getPosts() {
-    await fetchy(`/api/collections/${props.defaultCategory}`, "GET", {body: {title: props.defaultCategory}});
+    const newPosts = await fetchy(`/api/collections/${props.defaultCategory}`, "GET");
+    posts.value = newPosts;
 }
 
 function updateEditing(id: string) {

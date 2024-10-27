@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import PostListComponent from "@/components/Post/PostListComponent.vue";
+import SavedPostList from "@/components/Collection/SavedPostList.vue";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
 import { ref } from 'vue';
@@ -38,7 +38,7 @@ const toggleCategory = (category: string) => {
               {{ category.label }} ({{ expandedCategories.has(category.type) ? 'Click to Hide' : 'Click to Show' }})
             </button>
             <div v-if="expandedCategories.has(category.type)">
-              <PostListComponent 
+              <SavedPostList 
                 :isOnProfilePage="false" 
                 :defaultCategory="category.type" 
                 :contentCreatorsOnly="false" 

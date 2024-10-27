@@ -34,12 +34,15 @@ export default class AuthenticatingConcept {
     const user = await this.users.readOne({ _id });
     if (user) {
       try {
-        return user.defaults.length == 0;
-      } catch (_) {
+        if (user.defaults) {
+          return user.defaults.length == 0;
+        }
         return false;
+      } catch (_) {
+        throw new Error("checking if defaults is empty threw an error" + user.defaults);
       }
     }
-    throw new NotFoundError(`User not found!`);
+    throw new NotFoundError(`User not found when getting default collections!`);
   }
 
   async create(username: string, password: string, role: Role) {
@@ -58,7 +61,7 @@ export default class AuthenticatingConcept {
   async getUserById(_id: ObjectId) {
     const user = await this.users.readOne({ _id });
     if (user === null) {
-      throw new NotFoundError(`User not found!`);
+      throw new NotFoundError(`User not found when getting by id!`);
     }
     return this.redactPassword(user);
   }
@@ -83,7 +86,7 @@ export default class AuthenticatingConcept {
   async getUserByUsername(username: string) {
     const user = await this.users.readOne({ username });
     if (user === null) {
-      throw new NotFoundError(`User not found!`);
+      throw new NotFoundError(`User not found when getting by username!`);
     }
     return this.redactPassword(user);
   }
@@ -95,7 +98,7 @@ export default class AuthenticatingConcept {
   async getUserRole(_id: ObjectId) {
     const user = await this.users.readOne({ _id });
     if (user === null) {
-      throw new NotFoundError(`User not found!`);
+      throw new NotFoundError(`User not found when getting role!`);
     }
     return user.role;
   }
@@ -150,7 +153,7 @@ export default class AuthenticatingConcept {
   async assertUserExists(_id: ObjectId) {
     const maybeUser = await this.users.readOne({ _id });
     if (maybeUser === null) {
-      throw new NotFoundError(`User not found!`);
+      throw new NotFoundError(`User not found when asserting exists!`);
     }
   }
 

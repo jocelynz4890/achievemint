@@ -2,7 +2,7 @@
 import { useToastStore } from "@/stores/toast";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeMount } from "vue";
+import { computed, onBeforeMount, ref } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
 
 const currentRoute = useRoute();
@@ -10,14 +10,14 @@ const currentRouteName = computed(() => currentRoute.name);
 const userStore = useUserStore();
 const { isLoggedIn, role } = storeToRefs(userStore);
 const { toast } = storeToRefs(useToastStore());
-let isRegularUser: boolean;
+let isRegularUser = ref(false);
 
 // Make sure to update the session before mounting the app in case the user is already logged in
 onBeforeMount(async () => {
   try {
     await userStore.updateSession();
     await userStore.updateRole();
-    isRegularUser = role.value==="RegularUser" && isLoggedIn.value;
+    isRegularUser.value = (role.value==="RegularUser") && isLoggedIn.value;
     console.log("user is logged in: " + isLoggedIn.value);
     
   } catch {

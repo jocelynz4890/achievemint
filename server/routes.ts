@@ -16,17 +16,6 @@ const RoleSchema = z.enum([Role.RegularUser, Role.ContentCreator]);
 const PostOptionsSchema = z.object({
   backgroundColor: z.string().optional(),
 });
-async function makeDefaultCollections(session: SessionDoc) {
-  const owner = Sessioning.getUser(session);
-  const lifestyle = await Collectioning.createCollection(owner, Category.Root, "Lifestyle");
-  const health = await Collectioning.createCollection(owner, Category.Root, "HealthAndFitness");
-  const entertainment = await Collectioning.createCollection(owner, Category.Root, "Entertainment");
-  const food = await Collectioning.createCollection(owner, Category.Root, "FoodAndCooking");
-  const fashion = await Collectioning.createCollection(owner, Category.Root, "FashionAndBeauty");
-  const education = await Collectioning.createCollection(owner, Category.Root, "EducationAndDIY");
-  console.log("made new user's default collections");
-  return [lifestyle, health, entertainment, food, fashion, education];
-}
 
 /**
  * Web server routes for the app. Implements synchronizations between concepts.
@@ -105,8 +94,16 @@ class Routes {
   async logIn(session: SessionDoc, username: string, password: string) {
     const u = await Authing.authenticate(username, password);
     Sessioning.start(session, u._id);
-    if (await Authing.isDefaultsEmpty(u._id)) {
-      await makeDefaultCollections(session);
+    try {
+      const lifestyle = (await Collectioning.createCollection(u._id, Category.Root, "Lifestyle")).collection;
+      const health = (await Collectioning.createCollection(u._id, Category.Root, "HealthAndFitness")).collection;
+      const entertainment = (await Collectioning.createCollection(u._id, Category.Root, "Entertainment")).collection;
+      const food = (await Collectioning.createCollection(u._id, Category.Root, "FoodAndCooking")).collection;
+      const fashion = (await Collectioning.createCollection(u._id, Category.Root, "FashionAndBeauty")).collection;
+      const education = (await Collectioning.createCollection(u._id, Category.Root, "EducationAndDIY")).collection;
+      await Authing.setDefaults(u._id, [lifestyle!._id, health!._id, entertainment!._id, food!._id, fashion!._id, education!._id]);
+    } catch (_) {
+      return;
     }
     return { msg: "Logged in!" };
   }
@@ -328,7 +325,7 @@ class Routes {
     );
   }
 
-  @Router.get("/collections/:title")
+  @Router.get("/collections/shared/:title")
   /**
    * Given an owner and title of a collection, returns collections of the same title that are shared with the owner.
    */
