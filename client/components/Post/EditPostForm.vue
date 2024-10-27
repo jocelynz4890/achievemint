@@ -24,6 +24,8 @@ const editPost = async (content: string, defaultCategory: string) => {
   emit("editPost");
   emit("refreshPosts");
 };
+
+const updateCategory = (newValue: string) => {defaultCategory.value = newValue;}
 </script>
 
 <template>
@@ -31,7 +33,7 @@ const editPost = async (content: string, defaultCategory: string) => {
     <span>
       <p class="author">{{ props.post.author }}</p>
       <p>Category: </p>
-      <SelectPostCategory v-if="isAuthor" :default-category="defaultCategory" :editing-post="editingPost"/>
+      <SelectPostCategory v-if="isAuthor" @update:selected-value="updateCategory" :default-category="defaultCategory" :editing-post="editingPost"/>
       <p v-else>{{ defaultCategory }}</p>
     </span>
     <textarea id="content" v-model="content" placeholder="Create a post!" required> </textarea>
