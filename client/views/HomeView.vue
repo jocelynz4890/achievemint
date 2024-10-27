@@ -1,18 +1,21 @@
 <script setup lang="ts">
 import PostListComponent from "@/components/Post/PostListComponent.vue";
+import SelectPostCategory from "@/components/Post/SelectPostCategory.vue";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
+import { ref } from "vue";
 
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
+const defaultCategory = ref("Lifestyle");
+const editingPost = false;
 </script>
 
 <template>
   <main>
-    <h1>Home Page</h1>
-    <!-- filter by category -->
-     
+    <h1>Explore posts by content creators</h1>
+    <SelectPostCategory :default-category="defaultCategory" :editing-post="editingPost"/>
     <section>
-      <h1 v-if="isLoggedIn">Welcome {{ currentUsername }}!</h1>
+      <h5 v-if="isLoggedIn">Logged in as {{ currentUsername }}!</h5>
       <h1 v-else>Please login!</h1>
     </section>
     
