@@ -69,6 +69,14 @@ export default class PostingConcept {
     return await this.posts.readMany({ category });
   }
 
+  async getCategoryOf(_id: ObjectId) {
+    const post = await this.posts.readOne({ _id });
+    if (!post) {
+      throw new NotFoundError(`Post ${_id} does not exist!`);
+    }
+    return post.category;
+  }
+
   async update(_id: ObjectId, content?: string, category?: Category, options?: PostOptions) {
     // Note that if content or options is undefined, those fields will *not* be updated
     // since undefined values for partialUpdateOne are ignored.
