@@ -14,10 +14,10 @@ const { isLoggedIn, currentUsername, role } = storeToRefs(userStore);
 const loaded = ref(false);
 let posts = ref<Array<Record<string, string>>>([]);
 let editing = ref("");
-const props = defineProps(["isOnProfilePage", "defaultCategory", "contentCreatorsOnly", "author"]);
+const props = defineProps(["isOnProfilePage", "defaultCategory", "contentCreatorsOnly", "author", "collection"]);
 let searchAuthor = ref(props.author);
 const isContentCreator = role.value === "ContentCreator";
-const canShowCreate = ref(isLoggedIn.value && (isContentCreator || props.isOnProfilePage));
+const canShowCreate = ref(isLoggedIn.value && (isContentCreator || props.isOnProfilePage) && !props.collection);
 watch(() => props.defaultCategory, (newCategory) => {
   getPosts(searchAuthor.value, newCategory, props.contentCreatorsOnly);
 });

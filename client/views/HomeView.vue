@@ -11,6 +11,7 @@ const editingPost = false;
 const onProfilePage = ref(false);
 const contentCreatorsOnly = ref(true);
 const empty = "";
+const collection = false;
 
 function updateCategory(newCategory: string) {
   defaultCategory.value = newCategory;
@@ -26,7 +27,7 @@ function updateCategory(newCategory: string) {
       <h5 v-if="isLoggedIn">Logged in as {{ currentUsername }}!</h5>
       <h1 v-else>Please login!</h1>
     </section>
-    <PostListComponent v-if="isLoggedIn" :author="empty" :is-on-profile-page="onProfilePage" :content-creators-only="contentCreatorsOnly" :default-category="defaultCategory"/>
+    <PostListComponent v-if="isLoggedIn" :collection="collection" :author="empty" :is-on-profile-page="onProfilePage" :content-creators-only="contentCreatorsOnly" :default-category="defaultCategory"/>
   </main>
 </template>
 

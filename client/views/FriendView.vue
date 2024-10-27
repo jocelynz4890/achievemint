@@ -120,7 +120,7 @@ const unfollowUser = async (username:string, to:string) => {
         </div>
       </div>
 
-      <h1 v-if="isLoggedIn">Following</h1>
+      <!-- <h1 v-if="isLoggedIn">Following</h1>
       <div class="column" v-if="isLoggedIn">
         <input type="text" placeholder="Follow a content creator" v-model="newFollower" />
         <button @click="followUser(currentUsername, newFollower)">Follow</button>
@@ -129,7 +129,7 @@ const unfollowUser = async (username:string, to:string) => {
           <span>{{ follower }}</span>
           <span @click="unfollowUser(currentUsername, follower)">❌</span>
         </div>
-      </div>
+      </div> -->
 
       <h1 v-else>Please login!</h1>
     </section>
