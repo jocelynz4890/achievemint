@@ -8,18 +8,24 @@ import { ref } from "vue";
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 const defaultCategory = ref("Lifestyle");
 const editingPost = false;
-const onProfilePage = false;
+const onProfilePage = ref(false);
+const contentCreatorsOnly = ref(true);
+
+function updateCategory(newCategory: string) {
+  console.log("new category to filter by:" + newCategory + ", old category is "+defaultCategory.value);
+  defaultCategory.value = newCategory;
+}
 </script>
 
 <template>
   <main>
     <h1 v-if="isLoggedIn">Explore posts by content creators</h1>
-    <SelectPostCategory v-if="isLoggedIn" :default-category="defaultCategory" :editing-post="editingPost"/>
+    <SelectPostCategory v-if="isLoggedIn" @update:selected-value="updateCategory" :default-category="defaultCategory" :editing-post="editingPost"/>
     <section>
       <h5 v-if="isLoggedIn">Logged in as {{ currentUsername }}!</h5>
       <h1 v-else>Please login!</h1>
     </section>
-    <PostListComponent v-if="isLoggedIn" :is-on-profile-page="onProfilePage"/>
+    <PostListComponent v-if="isLoggedIn" :is-on-profile-page="onProfilePage" :content-creators-only="contentCreatorsOnly" :default-category="defaultCategory"/>
   </main>
 </template>
 

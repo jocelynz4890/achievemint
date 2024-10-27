@@ -5,7 +5,7 @@ import PostComponent from "@/components/Post/PostComponent.vue";
 import { useUserStore } from "@/stores/user";
 import { fetchy } from "@/utils/fetchy";
 import { storeToRefs } from "pinia";
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, ref, watch } from "vue";
 import SearchPostForm from "./SearchPostForm.vue";
 
 const userStore = useUserStore();
@@ -15,19 +15,36 @@ const loaded = ref(false);
 let posts = ref<Array<Record<string, string>>>([]);
 let editing = ref("");
 let searchAuthor = ref("");
-const props = defineProps(["isOnProfilePage"]);
+const props = defineProps(["isOnProfilePage", "defaultCategory", "contentCreatorsOnly"]);
 const isContentCreator = role.value === "ContentCreator";
 const canShowCreate = ref(isLoggedIn.value && (isContentCreator || props.isOnProfilePage));
+watch(() => props.defaultCategory, (newCategory) => {
+  getPosts(searchAuthor.value, newCategory);
+});
 
-async function getPosts(author?: string) {
-  let query: Record<string, string> = author !== undefined ? { author } : {};
+async function getPosts(author?: string, category?: string) {
+  let query: Record<string, string> = {};
+  if (author !== undefined) {
+    query.author = author;
+  }
+  if (category !== undefined) {
+    // If a category is provided, include it in the query
+    console.log("filtering by category" + category);
+    query.category = category;
+  }
+  if(props.contentCreatorsOnly){
+    console.log("filtering by just content creators"+ props.contentCreatorsOnly);
+    query.role = "ContentCreator";
+  }
+
   let postResults;
   try {
     postResults = await fetchy("/api/posts", "GET", { query });
+    console.log(postResults);
   } catch (_) {
     return;
   }
-  searchAuthor.value = author ? author : "";
+  searchAuthor.value = author || "";
   posts.value = postResults;
 }
 
@@ -37,7 +54,7 @@ function updateEditing(id: string) {
 
 onBeforeMount(async () => {
   await userStore.updateRole();
-  await getPosts();
+  await getPosts(searchAuthor.value, props.defaultCategory);
   loaded.value = true;
 });
 </script>
@@ -50,7 +67,7 @@ onBeforeMount(async () => {
   <div class="row">
     <h2 v-if="!searchAuthor">Posts:</h2>
     <h2 v-else>Posts by {{ searchAuthor }}:</h2>
-    <SearchPostForm @getPostsByAuthor="getPosts" />
+    <SearchPostForm v-if="!(searchAuthor===currentUsername)" @getPostsByAuthor="getPosts" />
   </div>
   <section class="posts" v-if="loaded && posts.length !== 0">
     <article v-for="post in posts" :key="post._id">
