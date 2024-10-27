@@ -54,8 +54,8 @@ export const useUserStore = defineStore(
       resetStore();
     };
 
-    const updateRole = async (username: string) => {
-      role.value = await fetchy("/api/users/role", "GET", { body: { username } });
+    const updateRole = async () => {
+      role.value = await fetchy("/api/users/role", "GET");
     };
 
     return {

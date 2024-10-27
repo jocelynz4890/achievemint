@@ -10,7 +10,6 @@ import SearchPostForm from "./SearchPostForm.vue";
 
 const userStore = useUserStore();
 const { isLoggedIn, currentUsername, role } = storeToRefs(userStore);
-await userStore.updateRole(currentUsername.value);
 
 const loaded = ref(false);
 let posts = ref<Array<Record<string, string>>>([]);
@@ -37,6 +36,7 @@ function updateEditing(id: string) {
 }
 
 onBeforeMount(async () => {
+  await userStore.updateRole();
   await getPosts();
   loaded.value = true;
 });

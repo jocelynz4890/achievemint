@@ -46,9 +46,9 @@ class Routes {
   }
 
   @Router.get("/users/role")
-  async getUserRole(username: string) {
-    const user = await Authing.getUserByUsername(username);
-    return await Authing.getUserRole(user._id);
+  async getUserRole(session: SessionDoc) {
+    const user = Sessioning.getUser(session);
+    return await Authing.getUserRole(user);
   }
 
   @Router.get("/users/:username")
