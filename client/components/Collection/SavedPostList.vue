@@ -5,9 +5,8 @@ import PostComponent from "@/components/Post/PostComponent.vue";
 import { useUserStore } from "@/stores/user";
 import { fetchy } from "@/utils/fetchy";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeMount, ref, watch } from "vue";
-import SearchPostForm from "./SearchPostForm.vue";
-
+import { onBeforeMount, ref, watch } from "vue";
+import SearchPostForm from "../Post/SearchPostForm.vue";
 const userStore = useUserStore();
 const { isLoggedIn, currentUsername, role } = storeToRefs(userStore);
 
@@ -17,33 +16,13 @@ let editing = ref("");
 const props = defineProps(["isOnProfilePage", "defaultCategory", "contentCreatorsOnly", "author", "collection"]);
 let searchAuthor = ref(props.author);
 const isContentCreator = role.value === "ContentCreator";
-const canShowCreate = computed(() => isLoggedIn.value && (isContentCreator || props.isOnProfilePage) && !props.collection);
+const canShowCreate = ref(isLoggedIn.value && (isContentCreator || props.isOnProfilePage) && !props.collection);
 watch(() => props.defaultCategory, (newCategory) => {
-  getPosts(searchAuthor.value, newCategory, props.contentCreatorsOnly);
+  getPosts();
 });
 
-async function getPosts(author?: string, category?: string, contentCreator?: boolean) {
-  let query: Record<string, string> = {};
-  if (author !== undefined) {
-    query.author = author;
-  }
-  if (category !== undefined) {
-    // If a category is provided, include it in the query
-    query.category = category;
-  }
-  if(contentCreator !== undefined){
-    if(contentCreator) query.role = "ContentCreator";
-    else query.role = "RegularUser";
-  }
-
-  let postResults;
-  try {
-    postResults = await fetchy("/api/posts", "GET", { query });
-  } catch (_) {
-    return;
-  }
-  searchAuthor.value = author || "";
-  posts.value = postResults;
+async function getPosts() {
+    await fetchy(`/api/collections/${props.defaultCategory}`, "GET", {body: {title: props.defaultCategory}});
 }
 
 function updateEditing(id: string) {
@@ -52,7 +31,7 @@ function updateEditing(id: string) {
 
 onBeforeMount(async () => {
   await userStore.updateRole();
-  await getPosts(searchAuthor.value, props.defaultCategory, props.contentCreatorsOnly);
+  await getPosts();
   loaded.value = true;
 });
 </script>

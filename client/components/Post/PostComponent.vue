@@ -19,6 +19,7 @@ watch(
 
 const deletePost = async () => {
   try {
+    await fetchy(`/api/collections/remove`, "PATCH", {body: {collectionTitle: props.post.category, post: props.post._id}});
     await fetchy(`/api/posts/${props.post._id}`, "DELETE");
   } catch {
     return;
@@ -27,18 +28,18 @@ const deletePost = async () => {
 };
 
 const upvotes = ref(props.post.quality_rating); 
-// watch(
-//   () => props.post.quality_rating,
-//   (newRating: number) => {
-//     upvotes.value = newRating;
-//   }
-// );
+watch(
+  () => props.post.quality_rating,
+  (newRating: number) => {
+    upvotes.value = newRating;
+  }
+);
 
 const savePost = async () => {
   upvotes.value += 1;
   try {
-    await fetchy(`/api/posts/${props.post._id}/increment-rating`, "PATCH");
-    // emit("refreshPosts");
+    await fetchy(`/api/collections/add`, "PATCH", {body: {collectionTitle: props.post.category, post: props.post._id}});
+    emit("refreshPosts");
   } catch(_) {
     return;
   }
@@ -47,8 +48,8 @@ const savePost = async () => {
 const unsavePost = async () => {
   upvotes.value -= 1;
   try {
-    await fetchy(`/api/posts/${props.post._id}/decrement-rating`, "PATCH");
-    // emit("refreshPosts");
+    await fetchy(`/api/collections/remove`, "PATCH", {body: {collectionTitle: props.post.category, post: props.post._id}});
+    emit("refreshPosts");
   } catch(_) {
     return;
   }

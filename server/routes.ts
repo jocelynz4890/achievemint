@@ -424,9 +424,11 @@ class Routes {
    * @param id id of a default category
    * @returns
    */
-  @Router.get("/collections/:id")
-  async getPostsInCollection(id: ObjectId) {
-    return await Collectioning.getContent(id);
+  @Router.get("/collections/:title")
+  async getPostsInCollection(session: SessionDoc, title: string) {
+    const user = Sessioning.getUser(session);
+    const collection = await Collectioning.getCollectionByTitle(user, title);
+    return await Collectioning.getContent(collection._id);
   }
 
   @Router.patch("/collections/add")
