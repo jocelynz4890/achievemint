@@ -10,7 +10,17 @@ const OptionTypes = {
     FashionAndBeauty: "FashionandBeauty",
     EducationAndDIY: "EducationandDIY",
 };
-const options = [[OptionTypes.All, "All"], 
+
+const props = defineProps(["defaultCategory", "editingPost"]);
+
+const options = props.editingPost ? [
+    [OptionTypes.Lifestyle, "Lifestyle"],
+    [OptionTypes.HealthAndFitness, "Health and Fitness"],
+    [OptionTypes.Entertainment, "Entertainment"],
+    [OptionTypes.FashionAndBeauty, "Food and Cooking"],
+    [OptionTypes.FashionAndBeauty, "Fashion and Beauty"],
+    [OptionTypes.EducationAndDIY, "Education and DIY"],
+] : [[OptionTypes.All, "All"], 
     [OptionTypes.Lifestyle, "Lifestyle"],
     [OptionTypes.HealthAndFitness, "Health and Fitness"],
     [OptionTypes.Entertainment, "Entertainment"],
@@ -19,8 +29,7 @@ const options = [[OptionTypes.All, "All"],
     [OptionTypes.EducationAndDIY, "Education and DIY"],
 ];
 
-const defaultCategory = defineProps(["defaultCategory"]);
-const selectedValue = ref(defaultCategory);
+const selectedValue = ref(props.defaultCategory);
 const emit = defineEmits(["update:selectedValue"]);
 
 // Watch for changes to selectedValue and emit the new value
