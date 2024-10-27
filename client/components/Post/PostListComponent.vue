@@ -14,33 +14,31 @@ const { isLoggedIn, currentUsername, role } = storeToRefs(userStore);
 const loaded = ref(false);
 let posts = ref<Array<Record<string, string>>>([]);
 let editing = ref("");
-let searchAuthor = ref("");
-const props = defineProps(["isOnProfilePage", "defaultCategory", "contentCreatorsOnly"]);
+const props = defineProps(["isOnProfilePage", "defaultCategory", "contentCreatorsOnly", "author"]);
+let searchAuthor = ref(props.author);
 const isContentCreator = role.value === "ContentCreator";
 const canShowCreate = ref(isLoggedIn.value && (isContentCreator || props.isOnProfilePage));
 watch(() => props.defaultCategory, (newCategory) => {
-  getPosts(searchAuthor.value, newCategory);
+  getPosts(searchAuthor.value, newCategory, props.contentCreatorsOnly);
 });
 
-async function getPosts(author?: string, category?: string) {
+async function getPosts(author?: string, category?: string, contentCreator?: boolean) {
   let query: Record<string, string> = {};
   if (author !== undefined) {
     query.author = author;
   }
   if (category !== undefined) {
     // If a category is provided, include it in the query
-    console.log("filtering by category" + category);
     query.category = category;
   }
-  if(props.contentCreatorsOnly){
-    console.log("filtering by just content creators"+ props.contentCreatorsOnly);
-    query.role = "ContentCreator";
+  if(contentCreator !== undefined){
+    if(contentCreator) query.role = "ContentCreator";
+    else query.role = "RegularUser";
   }
 
   let postResults;
   try {
     postResults = await fetchy("/api/posts", "GET", { query });
-    console.log(postResults);
   } catch (_) {
     return;
   }
@@ -54,7 +52,7 @@ function updateEditing(id: string) {
 
 onBeforeMount(async () => {
   await userStore.updateRole();
-  await getPosts(searchAuthor.value, props.defaultCategory);
+  await getPosts(searchAuthor.value, props.defaultCategory, props.contentCreatorsOnly);
   loaded.value = true;
 });
 </script>
@@ -64,10 +62,10 @@ onBeforeMount(async () => {
     <h2>Create a post:</h2>
     <CreatePostForm @refreshPosts="getPosts" />
   </section>
-  <div class="row">
+  <div class="row" v-if="!isOnProfilePage">
     <h2 v-if="!searchAuthor">Posts:</h2>
     <h2 v-else>Posts by {{ searchAuthor }}:</h2>
-    <SearchPostForm v-if="!(searchAuthor===currentUsername)" @getPostsByAuthor="getPosts" />
+    <SearchPostForm @getPostsByAuthor="getPosts" />
   </div>
   <section class="posts" v-if="loaded && posts.length !== 0">
     <article v-for="post in posts" :key="post._id">

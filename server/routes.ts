@@ -128,8 +128,8 @@ class Routes {
   }
 
   @Router.get("/posts")
-  @Router.validate(z.object({ author: z.string().optional() }))
-  async getPosts(author?: string, category?: Category, role?: Role) {
+  @Router.validate(z.object({ author: z.string().optional(), category: z.string().optional(), role: z.string().optional() }))
+  async getPosts(author?: string, category?: string, role?: string) {
     let posts;
     if (author) {
       const id = (await Authing.getUserByUsername(author))._id;
@@ -138,10 +138,11 @@ class Routes {
       posts = await Posting.getPosts();
     }
     if (category) {
-      posts.filter((post) => post.category === category);
+      if (category !== "All") posts = posts.filter((post) => post.category === category);
+      //throw new Error("author, category, role:" + posts + author + category + role);
     }
     if (role) {
-      await Promise.all(posts.filter(async (post) => (await Authing.getUserRole(post.author)) === role));
+      posts = await Promise.all(posts.filter(async (post) => (await Authing.getUserRole(post.author)) === role));
     }
     return Responses.posts(posts);
   }

@@ -10,9 +10,9 @@ const defaultCategory = ref("Lifestyle");
 const editingPost = false;
 const onProfilePage = ref(false);
 const contentCreatorsOnly = ref(true);
+const empty = "";
 
 function updateCategory(newCategory: string) {
-  console.log("new category to filter by:" + newCategory + ", old category is "+defaultCategory.value);
   defaultCategory.value = newCategory;
 }
 </script>
@@ -25,7 +25,7 @@ function updateCategory(newCategory: string) {
       <h5 v-if="isLoggedIn">Logged in as {{ currentUsername }}!</h5>
       <h1 v-else>Please login!</h1>
     </section>
-    <PostListComponent v-if="isLoggedIn" :is-on-profile-page="onProfilePage" :content-creators-only="contentCreatorsOnly" :default-category="defaultCategory"/>
+    <PostListComponent v-if="isLoggedIn" :author="empty" :is-on-profile-page="onProfilePage" :content-creators-only="contentCreatorsOnly" :default-category="defaultCategory"/>
   </main>
 </template>
 
