@@ -112,12 +112,12 @@ const unfollowUser = async (username:string, to:string) => {
           <span @click="rejectRequest(request.from)">❌</span>
         </div>
 
-        <h2>Friend Requests Outgoing</h2>
+        <!-- <h2>Friend Requests Outgoing</h2>
         <span v-if="requestsOutgoing && requestsOutgoing.length === 0">No requests outgoing</span>
         <div v-for="request in requestsOutgoing" class="card">
           <span>{{ request.to }}</span>
 \          <span @click="rejectOutgoing(request.to)">❌</span>
-        </div>
+        </div> -->
       </div>
 
       <!-- <h1 v-if="isLoggedIn">Following</h1>
