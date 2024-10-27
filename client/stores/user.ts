@@ -9,6 +9,7 @@ export const useUserStore = defineStore(
     const currentUsername = ref("");
 
     const isLoggedIn = computed(() => currentUsername.value !== "");
+    const role = ref("RegularUser");
 
     const resetStore = () => {
       currentUsername.value = "";
@@ -53,6 +54,10 @@ export const useUserStore = defineStore(
       resetStore();
     };
 
+    const getRole = async (username: string) => {
+      role.value = await fetchy("/api/users/role", "GET", { body: { username } });
+    };
+
     return {
       currentUsername,
       isLoggedIn,
@@ -63,6 +68,7 @@ export const useUserStore = defineStore(
       updateUserUsername,
       updateUserPassword,
       deleteUser,
+      getRole,
     };
   },
   { persist: true },

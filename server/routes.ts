@@ -45,6 +45,12 @@ class Routes {
     return await Authing.getUsers();
   }
 
+  @Router.get("/users/role")
+  async getUserRole(username: string) {
+    const user = await Authing.getUserByUsername(username);
+    return await Authing.getUserRole(user._id);
+  }
+
   @Router.get("/users/:username")
   @Router.validate(z.object({ username: z.string().min(1) }))
   async getUser(username: string) {
