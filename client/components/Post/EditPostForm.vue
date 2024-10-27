@@ -1,15 +1,23 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { useUserStore } from "@/stores/user";
+import { storeToRefs } from "pinia";
+import { computed, ref } from "vue";
 import { fetchy } from "../../utils/fetchy";
 import { formatDate } from "../../utils/formatDate";
+import SelectPostCategory from "./SelectPostCategory.vue";
+
+const { currentUsername } = storeToRefs(useUserStore());
 
 const props = defineProps(["post"]);
 const content = ref(props.post.content);
 const emit = defineEmits(["editPost", "refreshPosts"]);
+const defaultCategory = ref(props.post.category);
+const editingPost = true;
+const isAuthor = computed(() => currentUsername.value === props.post.author);
 
-const editPost = async (content: string) => {
+const editPost = async (content: string, defaultCategory: string) => {
   try {
-    await fetchy(`/api/posts/${props.post._id}`, "PATCH", { body: { content: content } });
+    await fetchy(`/api/posts/${props.post._id}`, "PATCH", { body: { content: content, category: defaultCategory } });
   } catch (e) {
     return;
   }
@@ -19,8 +27,13 @@ const editPost = async (content: string) => {
 </script>
 
 <template>
-  <form @submit.prevent="editPost(content)">
-    <p class="author">{{ props.post.author }}</p>
+  <form @submit.prevent="editPost(content, defaultCategory)">
+    <span>
+      <p class="author">{{ props.post.author }}</p>
+      <p>Category: </p>
+      <SelectPostCategory v-if="isAuthor" :default-category="defaultCategory" :editing-post="editingPost"/>
+      <p v-else>{{ defaultCategory }}</p>
+    </span>
     <textarea id="content" v-model="content" placeholder="Create a post!" required> </textarea>
     <div class="base">
       <menu>

@@ -2,11 +2,13 @@
 import { useUserStore } from "@/stores/user";
 import { formatDate } from "@/utils/formatDate";
 import { storeToRefs } from "pinia";
+import { ref } from "vue";
 import { fetchy } from "../../utils/fetchy";
 
 const props = defineProps(["post"]);
 const emit = defineEmits(["editPost", "refreshPosts"]);
 const { currentUsername } = storeToRefs(useUserStore());
+const category = ref(props.post.category);
 
 const deletePost = async () => {
   try {
@@ -19,7 +21,10 @@ const deletePost = async () => {
 </script>
 
 <template>
-  <p class="author">{{ props.post.author }}</p>
+  <span>
+    <p class="author">{{ props.post.author }}</p>
+    <p>Category: {{ category }}</p>
+  </span>
   <p>{{ props.post.content }}</p>
   <div class="base">
     <menu v-if="props.post.author == currentUsername">
