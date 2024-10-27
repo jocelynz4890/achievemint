@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import LevelDisplay from "@/components/Level/LevelDisplay.vue";
+import PostListComponent from "@/components/Post/PostListComponent.vue";
 import router from "@/router";
 import { useUserStore } from "@/stores/user";
 import { storeToRefs } from "pinia";
@@ -7,6 +8,7 @@ import UpdateUserForm from "../components/Setting/UpdateUserForm.vue";
 
 const { currentUsername } = storeToRefs(useUserStore());
 const { logoutUser, deleteUser } = useUserStore();
+const onProfilePage = true;
 
 async function logout() {
   await logoutUser();
@@ -24,10 +26,7 @@ async function delete_() {
     <h1>{{ currentUsername }}'s profile</h1>
     <LevelDisplay :user="currentUsername"/>
     <h1>{{ currentUsername }}'s posts'</h1>
-    <section v-if="isLoggedIn">
-      <h2>Create a post:</h2>
-      <CreatePostForm @refreshPosts="getPosts" />
-    </section>
+    <PostListComponent :is-on-profile-page="onProfilePage"/>
     <h1>{{ currentUsername }}'s settings</h1>
     <button class="pure-button pure-button-primary" @click="logout">Logout</button>
     <button class="button-error pure-button" @click="delete_">Delete User</button>
