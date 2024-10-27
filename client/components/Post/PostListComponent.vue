@@ -8,12 +8,17 @@ import { storeToRefs } from "pinia";
 import { onBeforeMount, ref } from "vue";
 import SearchPostForm from "./SearchPostForm.vue";
 
-const { isLoggedIn } = storeToRefs(useUserStore());
+const userStore = useUserStore();
+const { isLoggedIn, currentUsername, role } = storeToRefs(userStore);
+await userStore.updateRole(currentUsername.value);
 
 const loaded = ref(false);
 let posts = ref<Array<Record<string, string>>>([]);
 let editing = ref("");
 let searchAuthor = ref("");
+const props = defineProps(["isOnProfilePage"]);
+const isContentCreator = role.value === "ContentCreator";
+const canShowCreate = ref(isLoggedIn.value && (isContentCreator || props.isOnProfilePage));
 
 async function getPosts(author?: string) {
   let query: Record<string, string> = author !== undefined ? { author } : {};
@@ -38,7 +43,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <section v-if="isLoggedIn">
+  <section v-if="canShowCreate">
     <h2>Create a post:</h2>
     <CreatePostForm @refreshPosts="getPosts" />
   </section>

@@ -8,6 +8,7 @@ import { ref } from "vue";
 const { currentUsername, isLoggedIn } = storeToRefs(useUserStore());
 const defaultCategory = ref("Lifestyle");
 const editingPost = false;
+const onProfilePage = false;
 </script>
 
 <template>
@@ -19,7 +20,7 @@ const editingPost = false;
       <h1 v-else>Please login!</h1>
     </section>
     
-    <PostListComponent />
+    <PostListComponent :is-on-profile-page="onProfilePage"/>
   </main>
 </template>
 

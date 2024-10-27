@@ -54,13 +54,14 @@ export const useUserStore = defineStore(
       resetStore();
     };
 
-    const getRole = async (username: string) => {
+    const updateRole = async (username: string) => {
       role.value = await fetchy("/api/users/role", "GET", { body: { username } });
     };
 
     return {
       currentUsername,
       isLoggedIn,
+      role,
       createUser,
       loginUser,
       updateSession,
@@ -68,7 +69,7 @@ export const useUserStore = defineStore(
       updateUserUsername,
       updateUserPassword,
       deleteUser,
-      getRole,
+      updateRole,
     };
   },
   { persist: true },
