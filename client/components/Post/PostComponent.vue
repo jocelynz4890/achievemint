@@ -9,6 +9,7 @@ const props = defineProps(["post"]);
 const emit = defineEmits(["editPost", "refreshPosts"]);
 const { currentUsername } = storeToRefs(useUserStore());
 const category = ref(props.post.category);
+const saved = ref(false);
 
 watch(
   () => props.post.category,
@@ -21,6 +22,7 @@ const deletePost = async () => {
   try {
     await fetchy(`/api/collections/remove`, "PATCH", {body: {collectionTitle: props.post.category, post: props.post._id}});
     await fetchy(`/api/posts/${props.post._id}`, "DELETE");
+    saved.value = false;
   } catch {
     return;
   }
@@ -28,16 +30,12 @@ const deletePost = async () => {
 };
 
 const upvotes = ref(props.post.quality_rating); 
-watch(
-  () => props.post.quality_rating,
-  (newRating: number) => {
-    upvotes.value = newRating;
-  }
-);
 
 const savePost = async () => {
   upvotes.value += 1;
+  saved.value = true;
   try {
+    await fetchy(`/api/posts/increment/${props.post._id}`, "PATCH"); 
     await fetchy(`/api/collections/add`, "PATCH", {body: {collectionTitle: props.post.category, post: props.post._id}});
     emit("refreshPosts");
   } catch(_) {
@@ -47,7 +45,9 @@ const savePost = async () => {
 
 const unsavePost = async () => {
   upvotes.value -= 1;
+  saved.value = false;
   try {
+    await fetchy(`/api/posts/decrement/${props.post._id}`, "PATCH");
     await fetchy(`/api/collections/remove`, "PATCH", {body: {collectionTitle: props.post.category, post: props.post._id}});
     emit("refreshPosts");
   } catch(_) {
@@ -89,7 +89,8 @@ const categoryWithEmoji = computed(() => {
   </span>
   <p>{{ props.post.content }}</p>
   <h5>👍 This post has been saved a total of {{ upvotes }} times!</h5>
-  <button @click="savePost">❤️ {{ upvotes>0 ? upvotes : "Click to save to collection" }}</button>
+  <button v-if="!saved" @click="savePost">❤️ {{ saved ? "Click to unsave" : "Click to save to collection" }}</button>
+  <button v-if="saved" @click="unsavePost">❤️ {{ saved ? "Click to unsave" : "Click to save to collection" }}</button>
   <div class="base">
     <menu v-if="props.post.author == currentUsername">
       <li><button class="btn-small pure-button" @click="emit('editPost', props.post._id)">Edit</button></li>

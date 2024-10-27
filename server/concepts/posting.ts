@@ -39,10 +39,10 @@ export default class PostingConcept {
   async incrementQualityRating(_id: ObjectId) {
     const post = await this.posts.readOne({ _id });
     if (!post) {
-      throw new NotFoundError(`Post ${_id} does not exist!`);
+      throw new NotFoundError(`Post ${_id} does not exist! ${post}`);
     }
     const quality_rating = post.quality_rating + 1;
-    await this.posts.partialUpdateOne({ _id }, { quality_rating });
+    await this.posts.partialUpdateOne({ _id }, { quality_rating: quality_rating });
     return { msg: "Quality rating of post increased!" };
   }
 
@@ -52,7 +52,7 @@ export default class PostingConcept {
       throw new NotFoundError(`Post ${_id} does not exist!`);
     }
     const quality_rating = post.quality_rating - 1;
-    await this.posts.partialUpdateOne({ _id }, { quality_rating });
+    await this.posts.partialUpdateOne({ _id }, { quality_rating: quality_rating });
     return { msg: "Quality rating of post decreased!" };
   }
 

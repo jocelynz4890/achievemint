@@ -259,12 +259,12 @@ class Routes {
     return { msg: `Successfully rejected friend request from ${from}.` };
   }
 
-  @Router.patch("/posts/:id/increment-rating")
+  @Router.patch("/posts/increment/:id")
   async incrementPostQuality(id: ObjectId) {
     return await Posting.incrementQualityRating(id);
   }
 
-  @Router.patch("/posts/:id/decrement-rating")
+  @Router.patch("/posts/decrement/:id")
   async decrementPostQuality(id: ObjectId) {
     return await Posting.decrementQualityRating(id);
   }
