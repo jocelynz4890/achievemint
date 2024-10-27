@@ -32,10 +32,14 @@ export default class AuthenticatingConcept {
 
   async isDefaultsEmpty(_id: ObjectId) {
     const user = await this.users.readOne({ _id });
-    if (user === null) {
-      throw new NotFoundError(`User not found!`);
+    if (user) {
+      try {
+        return user.defaults.length == 0;
+      } catch (_) {
+        return false;
+      }
     }
-    return user.defaults.length == 0;
+    throw new NotFoundError(`User not found!`);
   }
 
   async create(username: string, password: string, role: Role) {
